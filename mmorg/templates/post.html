@@ -1,0 +1,77 @@
+
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+Post
+{% endblock title %}
+
+
+{% block content %}
+<!--<h1>{{ post }}</h1>-->
+
+   <h1>новость № {{ post.id }}</h1>
+   <hr>
+   {% if post %}
+       <table class="table-bordered" width="100%">
+           <tr>
+               <th>Автор</th>
+               <th>Категория</th>
+               <th>Заголовок</th>
+               <th>Дата</th>
+               <th>Объявление</th>
+               <th>изменить объявление</th>
+               <th>удалить объявление</th>
+               <th>фото</th>
+               <th>видео</th>
+               <th>файлы</th>
+
+           </tr>
+           <tr align="left" class="{% cycle 'blue' 'white' %}">
+               <td width="5%" >{{ post.user }}</td>
+               <td width="5%">{{ post.get_category_display }}</td>
+               <td width="10%" >{{ post.head }}</td>
+               <td width="10%">{{ post.date_create|date:'d.m.Y H:i' }}</td>
+               <td width="10%">{{ post.post_tekst|truncatechars:255 }}</td>
+               <td width="10%"><a href="/posts/{{post.id}}/edit/">изменить</a></td>
+               <td width="10%"><a href="/posts/{{post.id}}/delete/">удалить</a></td>
+               <td width="10%">
+                {% for foto in post.foto.all %}
+                 {{ foto }}
+                {% endfor %}
+               </td>
+               <td width="10%">
+                {% for video in post.video.all %}
+                 {{ video }}
+                {% endfor %}
+               </td>
+               <td width="10%">
+                {% for file in post.file.all %}
+                 {{ file }}
+                {% endfor %}
+                   </td>
+           </tr>
+       </table>
+
+       <table class="table-bordered" width="100%">
+             <tr><th>отклики</th></tr>
+           <tr><th><p><a href="/comments/create/">написать отклик</a></p></th></tr>
+             {% for p in Postes.all %}
+             <tr class="{% cycle 'blue' 'white' %}">
+               <td>
+                   пользователь {{ p.user }}<br>
+                   отклик {{ p.comment_tekst }}<br>
+                   отправлено {{ p.is_sendet }}<br>
+                   принято {{ p.is_ptinjato }}<br>
+               </td>
+             </tr>
+             {% endfor %}
+       </table>
+
+   {% else %}
+       <h2>Новостёв нет!</h2>
+
+   {% endif %}
+
+<p><a href="/posts/">ко всем новостям</a></p>
+
+{% endblock content %}

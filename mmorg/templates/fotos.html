@@ -1,0 +1,36 @@
+
+{% extends 'flatpages/default.html' %}
+{% block title %}
+объявления
+{% endblock title %}
+
+{% block content %}
+   <h1>объявления</h1>
+   <p><a href="/posts/search/">поиск объявлений</a></p>
+   <hr>
+   {% if fotos %}
+       <table class="table-bordered" width="100%">
+           <tr>
+               <th>id</th>
+               <th>post</th>
+               <th>фото</th>
+               <th>Дата</th>
+           </tr>
+           {% for foto in fotos %}
+           <tr align="left" >
+               <td width="20%">{{ foto.id }}</td>
+               <td width="5%">{{ foto.post }}</td>
+               <td width="20%">{{ foto.photo_url }})</td>
+               <td width="10%">{{ foto.date_create|date:'d.m.Y H:i' }}</td>
+           </tr>
+           {% endfor %}
+
+       </table>
+
+   {% else %}
+       <h2>Объявлений нет!</h2>
+   {% endif %}
+
+<p><a href="/posts/create/">добавить объявление</a></p>
+
+{% endblock content %}

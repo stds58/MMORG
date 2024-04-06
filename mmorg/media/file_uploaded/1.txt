@@ -1,0 +1,3 @@
+pydantic
+alembic
+https://github.com/zhanymkanov/fastapi-best-practices лучшие практике по фаст апи

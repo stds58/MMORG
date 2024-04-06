@@ -1,0 +1,67 @@
+
+{% extends 'flatpages/default.html' %}
+{% block title %}
+объявления
+{% endblock title %}
+
+{% block content %}
+   <h1>объявления</h1>
+   <p><a href="/posts/search/">поиск объявлений</a></p>
+   <hr>
+   {% if posts %}
+       {% for post in posts %}
+           Автор <br>
+           {{ post.user }} <br>
+           Категория <br>
+           {{ post.get_category_display }} <br>
+           Заголовок <br>
+           {{ post.head }} <br>
+           Дата <br>
+           {{ post.date_create|date:'d.m.Y H:i' }} <br>
+           Объявление <br>
+           {{ post.post_tekst|truncatechars:255 }} <br>
+           прочитать объявление <br>
+           <a href="/posts/{{post.id}}/">прочитать</a> <br>
+           изменить объявление <br>
+           <a href="/posts/{{post.id}}/edit/">изменить</a> <br>
+           удалить объявление <br>
+           <a href="/posts/{{post.id}}/delete/">удалить</a> <br>
+           фото <br>
+           {% for foto in post.foto.all %} {{ foto }} {% endfor %} <br>
+           видео <br>
+           {% for video in post.video.all %} {{ video }} {% endfor %} <br>
+           файлы <br>
+           {% for file in post.file.all %} {{ file }} {% endfor %} <br>
+           отклики <br>
+           {% for comment in post.comments_set.all %}
+           {{ comment }}<br>
+           {{ comment.comment_tekst }}
+           {% endfor %} <br>
+           <hr>
+
+       {% endfor %}
+   {% else %}
+       <h2>Объявлений нет!</h2>
+   {% endif %}
+
+
+   {% if page_obj.has_previous %}
+       <a href="?page=1">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+   {{ page_obj.number }}
+   {% if page_obj.has_next %}
+       <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+<p><a href="/posts/create/">добавить объявление</a></p>
+
+{% endblock content %}
+

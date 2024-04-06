@@ -1,0 +1,38 @@
+
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+{% for comment in comments %}
+автор объявления {{ comment.post.user }}<br>
+объявление {{ comment.post }}<br>
+автор отклика {{ comment.user }}<br>
+отклик {{ comment.comment_tekst }}<br>
+{% if not comment.is_ptinjato %}
+ <a href="update/{{ comment.id }}/">принять отклик</a><br>
+{% endif %}
+{% if not comment.is_ptinjato %}
+<a href="delete/{{ comment.id }}/">удалить отклик</a><br>
+{% endif %}
+<hr>
+
+{% endfor %}
+
+
+
+   {% if page_obj.has_previous %}
+       <a href="?page=1">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+   {{ page_obj.number }}
+   {% if page_obj.has_next %}
+       <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+{% endblock content %}
