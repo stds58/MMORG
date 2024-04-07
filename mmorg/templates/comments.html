@@ -1,7 +1,17 @@
 
 {% extends 'flatpages/default.html' %}
 
+
 {% block content %}
+<h1>Отклики</h1>
+<hr>
+   <form action="" method="get">
+       {# Переменная, которую мы передали через контекст, может сгенерировать нам форму с полями #}
+       {{ filterset.form.as_p }}
+       {# Добавим кнопку отправки данных формы #}
+       <input type="submit" value="Найти" />
+   </form>
+
 {% for comment in comments %}
 автор объявления {{ comment.post.user }}<br>
 объявление {{ comment.post }}<br>

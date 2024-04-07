@@ -13,8 +13,12 @@ from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from .forms import PostForm, AcceptCommentForm
 from django.db.models import Q
-#from .filters import CommentFilter
+from .filters import CommentFilter
 from django.http import HttpResponseNotFound
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.db.models import F
+from django.contrib.auth.mixins import UserPassesTestMixin
+
 
 
 def get_hash_md5(self,filename):
@@ -73,23 +77,6 @@ class PostsList(ListView):
     paginate_by = 10
 
 
-# class PostsListSearch(ListView):
-#     model = Post
-#     queryset = Post.objects.filter(type__exact='NE').order_by('-datetime_in')
-#     template_name = 'posts_search.html'
-#     context_object_name = 'posts_search'
-#     paginate_by = 10
-#
-#     def get_queryset(self):
-#         queryset = super().get_queryset()
-#         self.filterset = PostFilter(self.request.GET, queryset)
-#         return self.filterset.qs
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['filterset'] = self.filterset
-#         return context
-
 class PostsDetail(DetailView):
     model = Post
     template_name = 'post.html'
@@ -97,16 +84,13 @@ class PostsDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        #u1 = self.request.user
         post_id = self.request.path_info[7:][:-1]
-        # u2 = User.objects.get(username=u1)
-        #p1 = Post.objects.filter(id = post_id)
         c1 = Comment.objects.filter(post_id=post_id)
         context['Postes'] = c1
         return context
 
 
-class PostCreate(CreateView):
+class PostCreate(LoginRequiredMixin, CreateView):
     form_class = PostForm
     model = Post
     template_name = 'post_edit.html'
@@ -144,103 +128,76 @@ class PostCreate(CreateView):
         return super().form_valid(form)
 
 
-class PostUpdate(UpdateView):
+class PostUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     form_class = PostForm
     model = Post
     template_name = 'post_edit.html'
 
+    def test_func(self):
+        news = self.get_object()
+        return news.user == self.request.user
 
-class PostDelete(DeleteView):
+
+class PostDelete(LoginRequiredMixin,UserPassesTestMixin,  DeleteView):
     model = Post
     template_name = 'post_delete.html'
     success_url = reverse_lazy('posts_list')
 
+    def test_func(self):
+        news = self.get_object()
+        return news.user == self.request.user
 
-class FotoList(ListView):
+
+class FotoList(LoginRequiredMixin, ListView):
     model = Foto
-    #ordering = '-date_create'
     template_name = 'fotos.html'
     context_object_name = 'fotos'
     paginate_by = 10
 
 
-class CommentCreate(CreateView):
+class CommentCreate(LoginRequiredMixin, CreateView):
     form_class = CommentForm
     model = Comment
     template_name = 'comment_edit.html'
     success_url = ''
 
-class CommentAccept(UpdateView):
+class CommentAccept(LoginRequiredMixin, UpdateView):
     form_class = AcceptCommentForm
     model = Comment
     queryset = Comment.objects.filter(is_ptinjato=False)
     template_name = 'comment_accept.html'
     success_url = '/comments/'
 
-class CommentDelete(DeleteView):
+
+class CommentDelete(LoginRequiredMixin, DeleteView):
     model = Comment
     template_name = 'comment_delete.html'
     success_url = '/comments/'
 
-    # def get_queryset(self, **kwargs):
-    #     #queryset = super().get_queryset()
-    #     u1 = self.request.user
-    #     p1 = Post.objects.filter(user = u1)
-    #     c1 = Comment.objects.select_related('post').filter(post__user=u1)
-    #     queryset = c1
-    #     #context['Users'] = u1
-    #     return queryset
 
-class CommentsList(ListView):
+class CommentsList(LoginRequiredMixin, ListView):
     model = Comment
     ordering = '-date_create'
     template_name = 'comments.html'
     context_object_name = 'comments'
     paginate_by = 5
-    #CommentFilter
-    def get_queryset(self, **kwargs):
+
+    def get_queryset(self):
         #queryset = super().get_queryset()
         u1 = self.request.user
-        p1 = Post.objects.filter(user = u1)
         c1 = Comment.objects.select_related('post').filter(post__user=u1)
         queryset = c1
-        #context['Users'] = u1
-        return queryset
+        self.filterset = CommentFilter(self.request.GET, queryset)
+        return self.filterset.qs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        u1 = self.request.user
+        print('self.request.user',self.request.user)
+        c1 = Comment.objects.select_related('post').filter(post__user=u1)
+        queryset = c1
+        #self.filterset = CommentFilter(self.request.GET, queryset)
+        #print('self.filterset',self.filterset.qs)
+        context['filterset'] = self.filterset
+        return context
 
-   # # Переопределяем функцию получения списка товаров
-   # def get_queryset(self):
-   #     # Получаем обычный запрос
-   #     queryset = super().get_queryset()
-   #     # Используем наш класс фильтрации.
-   #     # self.request.GET содержит объект QueryDict, который мы рассматривали
-   #     # в этом юните ранее.
-   #     # Сохраняем нашу фильтрацию в объекте класса,
-   #     # чтобы потом добавить в контекст и использовать в шаблоне.
-   #     self.filterset = ProductFilter(self.request.GET, queryset)
-   #     # Возвращаем из функции отфильтрованный список товаров
-   #     return self.filterset.qs
-   #
-   # def get_context_data(self, **kwargs):
-   #     context = super().get_context_data(**kwargs)
-   #     # Добавляем в контекст объект фильтрации.
-   #     context['filterset'] = self.filterset
-
-   # #     return context
-   #  def get_queryset(self, **kwargs):
-   #      context = super().get_context_data(**kwargs)
-   #      u1 = self.request.user
-   #      # u2 = User.objects.get(username=u1)
-   #      p1 = Post.objects.filter(user = u1)
-   #      c1 = Comment.objects.select_related("post").filter(post__user=u1)
-   #      context['Commentes'] = c1
-   #      #context['Users'] = u1
-   #      return context
-
-# def prinjat_otklik(request, pk):
-#     user  = request.user
-#     comment = Comment.objects.get(id=pk)
-#     comment.subscribers.add(user)
-#
-#     message = 'вы подписались на рассылку новостей категории '
-#     return render(request, 'news/subscribe.html', {'category': category, 'message': message})
